@@ -11,19 +11,66 @@
      volatile是Java虚拟机提供的轻量级的同步机制，他保证可见性，不保证原子性，禁止指令重排。
      
      ```java
+     import java.util.concurrent.atomic.AtomicInteger;
+     
      class MyData {
+     
          volatile int number = 0;
+     
          public void addTo60() {
              number = 60;
          }
-     }
      
+         // number是有volatile修饰的
+         public void addPlusPlus() {
+             number++;
+         }
+     
+         AtomicInteger atomicInteger = new AtomicInteger();
+         public void addAtomic() {
+             atomicInteger.getAndIncrement();
+         }
+     }
+    
      /**
       * 1 验证volatile的可见性
       *   假设int number = 0,number变量没有添加volatile关键字修饰,即没有可见性
+      *   添加了volatile，可以解决可见性的问题。
+      * 2 验证volatile不保证原子性
+      *   原子性是什么意思？
+      *      不可分割，完整性，也即某个线程正在做某个具体业务时，中间不可以被加塞或者被分割。需要整体完整，要么同时成功，要么同时失败。
+      *   volatile不保证原子性的案例展示
+      *   如何解决原子性？
+      *      * 加synchronized
+      *      * 使用原子类
       */
      public class VolatileDemo {
          public static void main(String[] args) { // main线程
+     
+         }
+     
+         //volatile不保证原子性的案例展示
+         private static void notAtmocValtile() {
+             MyData myData = new MyData();
+             //开20个线程 每个线程加1k次
+             for (int i = 0; i < 20; i++) {
+                 new Thread(()->{
+                     for (int j = 0; j < 1000; j++) {
+                         myData.addPlusPlus();
+                         myData.addAtomic();
+                     }
+                 },i+1+"").start();
+             }
+             //main取得number的值
+             // 需要等待以上线程都计算完成后，再用main线程取值
+             while (Thread.activeCount() > 2) { //2:mian和gc线程
+                 Thread.yield();//礼让
+             }
+             System.out.println(Thread.currentThread().getName()+"\tfinally number  is "+myData.number+"\t atmocNum is "+myData.atomicInteger.get());
+         }
+     
+         // volatile可以保证可见性，及时通知其他线程，主内存的值被修改了
+         private static void seeOkVolatile() {
              MyData myData = new MyData(); //资源类
      
              // 第一个线程修改值
@@ -41,7 +88,9 @@
              }
              System.out.println(Thread.currentThread().getName()+"\t mission over, main get number value is "+myData.number);
          }
+     
      }
+     
      ```
      
      
@@ -78,7 +127,7 @@
 
 ###### number++在多线程下是非线程安全的，如何不加synchronized解决？
 
-使用原子类代替，
+使用原子类代替。
 
 ##### 有序性
 
@@ -92,4 +141,97 @@
 
 多线程环境中线程交替执行，由于编译器优化重排的存在，两个线程中使用的变量能否保证一致性是无法确定的，结果无法预测
 
- ## 3.  你在哪些地方用过volatile？
+
+
+> 工作内存与主内存同步延迟现象导致的可见性问题，可以使用synchorized或volatile关键字解决，他们都可以使一个线程修改后的变量立即对其他线程可见。
+>
+> 对于指令重排导致的可见性问题和有序性问题，可以利用volatile关键字解决，因为volatile的另外一个作用就是禁止重排序优化
+
+## 3.  你在哪些地方用过volatile？
+
+## 单例模式DCL代码
+
+```java
+public class Singleton {
+
+    private static Singleton instance = null;
+
+    private Singleton(){
+        System.out.println(Thread.currentThread().getName() + "线程\t,构造器执行了");
+    }
+
+    public static Singleton getInstance() {
+        if (instance == null) instance = new Singleton();
+        return instance;
+    }
+
+    public static void main(String[] args) {
+        // 单线程下  没有问题
+        //System.out.println(Singleton.getInstance()==Singleton.getInstance());
+
+        // 多线程下，情况发生了变化
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
+                Singleton.getInstance();
+            }, i + 1 + "").start();
+        }
+    }
+}
+```
+
+测试结果：多线程下，无法保证对象使单例的。
+
+![1610897825797](01-volatile%E5%85%B3%E9%94%AE%E5%AD%97/1610897825797.png)
+
+## 单例模式volatile分析
+
+```java
+ public class Singleton {
+
+    private static volatile Singleton instance = null; // volatile禁止指令重排
+
+    private Singleton(){
+        System.out.println(Thread.currentThread().getName() + "线程\t构造器执行了");
+    }
+
+    /*
+     * DCL模式：double check lock 双端检锁机制
+     * DCL机制不一定线程安全，原因是有指令重排的存在，加入volatile可以禁止指令重排序。
+     * 原因在于某一个线程执行到第一次检测，读取到instance不为null时，instance的引用对象可能没有完成初始化，
+     * instance = new Singleton(); 可分为以下3步完成（伪代码）
+     *   memory = allocate(); //1分配对象内存空间
+     *   instance(memory);    //2初始化对象
+     *   instance = memory;   //3设置instance指向刚分配的内存地址，此时instance!=null
+     * 由于步骤2和步骤3不存在数据依赖关系，而且无论重排前还是重排后的执行结果在单线程中并没有改变，
+     * 因此这种重排优化是允许的。
+     *   memory = allocate(); //1分配对象内存空间
+     *   instance = memory;   //3设置instance指向刚分配的内存地址，此时instance!=null，但是对象的初始化还没有完成！
+     *   instance(memory);    //2初始化对象
+     * 但是指令重排只会保证串行语义的执行的一致性（单线程），但并不会关心多线程间的语义一致性。
+     * 所以当一条线程访问instance不为null时，由于instance实例未必已经初始化完成，也就造成了线程安全问题。
+     */
+    public static Singleton getInstance() {
+        if (instance == null) {
+            synchronized (Singleton.class) {
+                if (instance == null) instance = new Singleton();
+            }
+        }
+        return instance;
+    }
+
+    public static void main(String[] args) {
+        // 单线程下  没有问题
+        //System.out.println(Singleton.getInstance()==Singleton.getInstance());
+
+        // 多线程下，情况发生了变化
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
+                Singleton.getInstance();
+            }, i + 1 + "").start();
+        }
+    }
+}
+```
+
