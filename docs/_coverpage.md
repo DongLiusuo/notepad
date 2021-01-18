@@ -1,6 +1,6 @@
 [comment]: <> (![logo]&#40;images/logo.png&#41;)
 
-# 随便记点或写点什么。
+# 记点东西。。。
 
 > Liusuo.dong
 
