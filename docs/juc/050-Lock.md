@@ -122,6 +122,8 @@ public class ReentrantLockDemo {
 
 循环比较获取直到成功为止，没有类似wait的阻塞
 
+### 手写一个自旋锁
+
 ```java
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -176,6 +178,91 @@ public class SpinLockDemo {
             spinLockDemo.myUnLock();
         },"BB").start();
 
+    }
+}
+
+```
+
+# 独占锁（写锁）、共享锁（读锁）、互斥锁
+
+### 独占锁
+
+独占锁指该锁只能被一个线程所持有。对ReentrantLock和synchronized而言都是独占锁
+
+### 共享锁
+
+指该锁可被多个线程所持有。对ReentrantReadLock其读锁是共享锁，其写锁是独占锁，读锁是共享锁。
+
+读锁可保证并发读是非常高效的，读写、写读、写写都是互斥的。
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+/**
+ * 多个线程同时读一个资源类没有任何问题，所以为了满足并发量，读取共享资源应该可以同时进行。
+ * 但是如果有一个线程去写共享资源，就不应该再有其他线程可以对该资源进行读或写
+ *
+ * 写操作：原子性、独占性。
+ */
+public class ReentrantReadWriteLockDemo {
+    public static void main(String[] args) {
+        MyCache myCache = new MyCache();
+        // 5个线程写
+        for (int i = 0; i < 5; i++) {
+            int finalI = i;
+            new Thread(()->{
+                myCache.put(finalI + "", finalI + "");
+            },i+1+"线程").start();
+        }
+        // 5个线程读
+        for (int i = 0; i < 5; i++) {
+            int finalI = i;
+            int finalI1 = i;
+            new Thread(()->{
+                Object rt = myCache.get(finalI1 + "");
+            },i+1+"线程").start();
+        }
+    }
+}
+
+// 模拟简单的分布式缓存
+class MyCache{
+    private final Map<String, Object> map = new HashMap<>();
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+
+
+    public void put(String key, Object value) {
+        rwLock.writeLock().lock();
+        try {
+            System.out.println(Thread.currentThread().getName() + "\t正在写入：" + key);
+            // 模拟网络拥堵
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            map.put(key, value);
+            System.out.println(Thread.currentThread().getName() + "\t写入完成。" + key);
+        }finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+    public Object get(String key) {
+        rwLock.readLock().lock();
+        try {
+            System.out.println(Thread.currentThread().getName() + "\t正在读取：" );
+            Object rt = map.get(key);
+            System.out.println(Thread.currentThread().getName() + "\t读取完成。" + rt);
+            return rt;
+        }finally {
+            rwLock.readLock().unlock();
+        }
+    }
+
+    public void clearCache() {
+        map.clear();
     }
 }
 
