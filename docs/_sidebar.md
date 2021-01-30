@@ -5,3 +5,4 @@
     * [锁](juc/050-Lock.md)
     * [CountDownlatch/CyclicBarrier/Semaphore](juc/060-CountDownlatch_CyclicBarrier_Semaphore.md)
     * [阻塞队列](juc/070-BlockingQueue.md)
+    * [synchronized和Lock的区别](juc/080-synchronizedAndLock.md)

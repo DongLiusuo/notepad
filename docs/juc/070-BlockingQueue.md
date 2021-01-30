@@ -148,6 +148,102 @@ public class ProdConsumerTraditionDemo {
 }
 ```
 
+**阻塞队列版**
+
+```java
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+class MyResource{
+
+    // 标志位 默认开启生成+消费
+    private volatile boolean START = true;
+
+    // 生产一个 消费一个
+    private AtomicInteger atomicInteger = new AtomicInteger(0);
+
+    private BlockingQueue<String> blockingQueue;
+
+    public MyResource(BlockingQueue<String> blockingQueue) {
+        this.blockingQueue = blockingQueue;
+        System.out.println(blockingQueue.getClass().getName());
+
+    }
+
+    public void myProd() throws InterruptedException {
+        String data = null;
+        boolean rtValue = false;
+        while (START) {
+            data = atomicInteger.incrementAndGet() + "";
+            rtValue=blockingQueue.offer(data, 2L, TimeUnit.SECONDS);
+            if (rtValue) {
+                System.out.println(Thread.currentThread().getName() + "\t插入队列：" + data + ",成功");
+            } else {
+                System.out.println(Thread.currentThread().getName() + "\t插入队列：" + data + ",失败");
+            }
+            TimeUnit.SECONDS.sleep(1);
+        }
+        System.out.println(Thread.currentThread().getName() + "\tflag=" + false + ",生产结束");
+    }
+
+    public void myConsumer() throws Exception {
+        String rt = null;
+        while (START) {
+            rt = blockingQueue.poll(2L, TimeUnit.SECONDS);
+            if (rt == null || rt.equalsIgnoreCase("")) {
+                START = false;
+                System.out.println(Thread.currentThread().getName()+"\t超过两秒种没有取到，消费退出");
+                return;
+            }
+            System.out.println(Thread.currentThread().getName() + "\t消费队列：" + rt + "，成功");
+        }
+    }
+
+    public void stop() {
+        this.START = false;
+    }
+}
+
+/**
+ * 一个初始值为0的变量，两个线程对其交替操作，一个加1 一个减1 循环5次
+ * 阻塞队列版
+ *
+ * volatile/CAS/AtomicInteger/BlockingQueue/线程交互/原子引用
+ *
+ */
+public class ProdConsumerBlockingQueueDemo {
+
+    public static void main(String[] args) throws InterruptedException {
+        MyResource myResource = new MyResource(new ArrayBlockingQueue<>(10));
+        new Thread(() -> {
+            System.out.println(Thread.currentThread().getName() + "\t生产线程启动");
+            try {
+                myResource.myProd();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, "生产").start();
+        new Thread(() -> {
+            System.out.println(Thread.currentThread().getName() + "\t消费线程启动");
+            try {
+                myResource.myConsumer();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, " 消费").start();
+        TimeUnit.SECONDS.sleep(5);
+        System.out.println();
+        System.out.println();
+        System.out.println("5秒，main线程叫停");
+        myResource.stop();
+    }
+}
+
+```
+
 
 
 ### 线程池
