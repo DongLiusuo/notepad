@@ -67,6 +67,9 @@
                  Thread.yield();//礼让
              }
              System.out.println(Thread.currentThread().getName()+"\tfinally number  is "+myData.number+"\t atmocNum is "+myData.atomicInteger.get());
+             /*运行结果
+              main	finally number  is 19880	 atmocNum is 20000
+             */
          }
      
          // volatile可以保证可见性，及时通知其他线程，主内存的值被修改了
