@@ -448,8 +448,6 @@
 
 ![1614099125089](010-ArrayList/1614099125089.png)
 
-## 3.2 源码分析
-
 ### 空参构造
 
 ```java
@@ -549,3 +547,1104 @@ class Arrays {
 }
 ```
 
+## 3.2 添加方法
+
+| 方法                                                       | 描述                                                         |
+| :--------------------------------------------------------- | :----------------------------------------------------------- |
+| public boolean add(E e)                                    | 将指定的元素追加到此列表的末尾。                             |
+| public void add(int index, E element)                      | 在此列表中的指定位置插入指定的元素。                         |
+| public boolean addAll(Collection<? extends E> c)           | 按指定集合的Iterator返回的顺序将指定集合中的所有元素追加到此列表的末尾。 |
+| public boolean addAll(int index, Collection<? extends E> c | 将指定集合中的所有元素插入到此列表中，从指定的位置开始。     |
+
+### public boolean add(E e)
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    public boolean add(E e) {
+        ensureCapacityInternal(size + 1);
+        elementData[size++] = e;
+        return true;
+    }
+
+    private void ensureCapacityInternal(int minCapacity) {
+        // 元素是不是空的，如果是 给初始容量10
+        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
+            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
+        }
+
+        ensureExplicitCapacity(minCapacity);
+    }
+
+    private void ensureExplicitCapacity(int minCapacity) {
+        // 修改集合的次数
+        modCount++;
+        // 判断是否需要扩容
+        if (minCapacity - elementData.length > 0)
+            grow(minCapacity);
+    }
+
+    private void grow(int minCapacity) {
+        int oldCapacity = elementData.length;
+        // >> : 右移,右移几位就相当于除以2的几次幂
+        // << : 左移,左移几位就相当于乘以2的几次幂
+        //扩容的核心算法: 原容量的1.5倍
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0)
+            newCapacity = minCapacity;
+        if (newCapacity - MAX_ARRAY_SIZE > 0)
+            newCapacity = hugeCapacity(minCapacity);
+        // minCapacity is usually close to size, so this is a win:
+        elementData = Arrays.copyOf(elementData, newCapacity);
+    }
+ }
+```
+
+
+
+### public void add(int index, E element)
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    public void add(int index, E element) {
+        rangeCheckForAdd(index); // 判断索引是否越界
+
+        ensureCapacityInternal(size + 1);  // Increments modCount!!
+        System.arraycopy(elementData, index, elementData, index + 1,
+                         size - index);
+        elementData[index] = element;
+        size++;
+    }
+
+    private void ensureCapacityInternal(int minCapacity) {
+        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
+            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
+        }
+
+        ensureExplicitCapacity(minCapacity);
+    }
+
+     private void ensureExplicitCapacity(int minCapacity) {
+        modCount++;
+
+        //只有容量不够的情况下才会调用 核心扩容的grow方法
+        if (minCapacity - elementData.length > 0)
+            grow(minCapacity);
+     }
+
+    private void rangeCheckForAdd(int index) {
+        if (index > size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+
+ }
+```
+
+
+
+### public boolean addAll(Collection<? extends E> c)
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    public boolean addAll(Collection<? extends E> c) {
+        //把有数据的集合转成数组
+        Object[] a = c.toArray();
+        //有数据集合长度赋值给numNew
+        int numNew = a.length;
+        //校验以及扩容
+        ensureCapacityInternal(size + numNew);  // Increments modCount
+        //真正拷贝的代码
+        System.arraycopy(a, 0, elementData, size, numNew);
+        //集合的长度进行更改
+        size += numNew;
+        //根据numNew的值返回是否添加成功
+        return numNew != 0;
+    }
+
+ }
+
+ //结论:底层使用了System.arraycopy方法进行了拷贝
+```
+
+
+
+### public boolean addAll(int index, Collection<? extends E> c)
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+     public boolean addAll(int index, Collection<? extends E> c) {
+        //校验索引
+        rangeCheckForAdd(index);
+        //将数据源转成数组
+        Object[] a = c.toArray();
+        //记录数据源的长度 3
+        int numNew = a.length;
+        //目的就是为了给集合存储数据的数组进行扩容
+        ensureCapacityInternal(size + numNew);
+
+        //numMoved:代表要移动元素的个数 --> 1个
+        //numMoved: 数据目的(集合list1)的长度-调用addAll的第一个参数 (索引1)
+        int numMoved = size - index;
+        //判断需要移动的个数是否大于0
+        if (numMoved > 0)
+            //使用System中的方法arraycopy进行移动
+            System.arraycopy(elementData, index, elementData, index + numNew,
+                             numMoved);
+        //才是真正将数据源(list)中的所有数据添加到数据目的(lsit1)
+        System.arraycopy(a, 0, elementData, index, numNew);
+        size += numNew;
+        return numNew != 0;
+    }
+
+    private void rangeCheckForAdd(int index) {
+        if (index > size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+ }
+
+public final class System {
+
+    参数
+            src - 源数组。
+            srcPos - 源数组中的起始位置。
+            dest - 目标数组。
+            destPos - 目的地数据中的起始位置。
+            length - 要复制的数组元素的数量。
+
+    public static void arraycopy(Object src,int srcPos,Object dest,int destPos,int length)
+}
+```
+
+
+
+## 3.3 删除方法
+
+```java
+public class ArrayList<E> {
+	public E remove(int index) {
+        //范围校验
+        rangeCheck(index);
+	   //增量++
+        modCount++;
+        //将index对应的元素赋值给 oldValue
+        E oldValue = elementData(index);
+	    //计算集合需要移动元素个数
+        int numMoved = size - index - 1;
+        //如果需要移动元素个数大于0,就使用arrayCopy方法进行拷贝
+        //注意:数据源和数据目的就是elementData
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        //将源集合最后一个元素置为null,尽早让垃圾回收机制对其进行回收
+        elementData[--size] = null;
+	   //返回被删除的元素
+        return oldValue;
+    }
+}
+```
+
+## 3.4 修改方法
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    public E set(int index, E element) {
+        //校验索引
+        rangeCheck(index);
+        //根据索引取出元素 --> 被替换的元素
+        E oldValue = elementData(index);
+        //把element存入到elementData数组中
+        elementData[index] = element;
+        //返回被替换的元素
+        return oldValue;
+    }
+
+    private void rangeCheck(int index) {
+        if (index >= size)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+ }
+```
+
+
+
+## 3.5 获取方法
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+
+    public E get(int index) {
+        //校验索引
+        rangeCheck(index);
+        //根据索引获取数组(集合)中的元素
+        return elementData(index);
+    }
+
+    private void rangeCheck(int index) {
+        if (index >= size)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+ }
+```
+
+
+
+## 3.6 toString()
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+ }
+
+ //ArrayList集合的亲爷爷类
+ public abstract class AbstractCollection<E> {
+
+    public String toString() {
+        //获取迭代器
+        Iterator<E> it = iterator();
+        //判断迭代器是否有元素
+        if (! it.hasNext())
+            return "[]";
+        //创建StringBuilder
+        StringBuilder sb = new StringBuilder();
+        //先追加了'['
+        sb.append('[');
+        //无限循环
+        for (;;) {
+            //调用迭代器的next方法取出元素,且将光标向下移动
+            E e = it.next();
+            //三元判断
+            sb.append(e == this ? "(this Collection)" : e);
+            if (! it.hasNext())
+                //没有元素,在缓冲区的最后追加']',且把整个缓冲区的数据转成字符串
+                //然后再结束该方法
+                return sb.append(']').toString();
+
+            //有元素,就直接追加
+            sb.append(',').append(' ');
+        }
+    }
+ }
+```
+
+## 3.7 迭代器iterator()
+
+`public Iterator<E> iterator()`普通迭代器
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    //获取迭代器的方法
+    public Iterator<E> iterator() {
+        //创建了一个对象
+        return new Itr();
+    }
+
+    //ArrayList集合的内部类 --> 迭代器的源码
+    private class Itr implements Iterator<E> {
+        int cursor;       // 光标,默认值就是0
+        int lastRet = -1; // 记录-1
+        // 将集合实际修改次数赋值给预期修改次数
+        int expectedModCount = modCount;
+
+        //判断集合是否有元素
+        public boolean hasNext() {
+            //光标是否不等于集合的size 3
+            return cursor != size;
+        }
+
+        public E next() {
+            checkForComodification();
+            //光标赋值给i = 0
+            int i = cursor;
+            //判断,如果大于集合的size就说明没有元素了
+            if (i >= size)
+                throw new NoSuchElementException();
+            //把集合存储数据数组的地址赋值给该方法的局部变量
+            Object[] elementData = ArrayList.this.elementData;
+            //进行判断,如果条件满足就会产生并发修改异常
+            if (i >= elementData.length)
+                throw new ConcurrentModificationException();
+            //光标自增
+            cursor = i + 1;
+            //从数组中取出元素且返回
+            return (E) elementData[lastRet = i];
+        }
+
+        //校验预期修改集合次数是否和实际修改集合次数一样
+        final void checkForComodification() {
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+        }
+    }
+
+ }
+```
+
+`Exception in thread "main" java.util.ConcurrentModificationException`并发修改异常
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    //查看add方法其目的就是为了找到记录集合实际修改次数的变量
+    public boolean add(E e) {
+        ensureCapacityInternal(size + 1);
+        elementData[size++] = e;
+        return true;
+    }
+
+    //获取迭代器的方法
+    public Iterator<E> iterator() {
+        //创建了一个对象
+        return new Itr();
+    }
+
+    //ArrayList集合的内部类 --> 迭代器的源码
+    private class Itr implements Iterator<E> {
+        int cursor;       // 光标,默认值就是0
+        int lastRet = -1; // 记录-1
+        // 将集合实际修改次数赋值给预期修改次数
+        // 获取迭代器的时候,那么expectedModCount的值也就是 3
+        int expectedModCount = modCount;
+
+        //判断集合是否有元素
+        public boolean hasNext() {
+            //光标是否不等于集合的size 3
+            return cursor != size;
+        }
+
+        public E next() {
+            checkForComodification();
+            //光标赋值给i = 0
+            int i = cursor;
+            //判断,如果大于集合的size就说明没有元素了
+            if (i >= size)
+                throw new NoSuchElementException();
+            //把集合存储数据数组的地址赋值给该方法的局部变量
+            Object[] elementData = ArrayList.this.elementData;
+            //进行判断,如果条件满足就会产生并发修改异常
+            if (i >= elementData.length)
+                throw new ConcurrentModificationException();
+            //光标自增
+            cursor = i + 1;
+            //从数组中取出元素且返回
+            return (E) elementData[lastRet = i];
+        }
+
+        //校验预期修改集合次数是否和实际修改集合次数一样
+        final void checkForComodification() {
+            if (modCount != expectedModCount)
+                //如果不一样,就会产生并发修改异常
+                throw new ConcurrentModificationException();
+        }
+    }
+
+    //集合删除元素的方法
+    public boolean remove(Object o) {
+        //判断要删除的元素是否为null
+        if (o == null) {
+            for (int index = 0; index < size; index++)
+                if (elementData[index] == null) {
+                    fastRemove(index);
+                    return true;
+                }
+        } else {
+            //遍历集合
+            for (int index = 0; index < size; index++)
+                //拿着要删除的元素和集合的每一个元素进行比较
+                if (o.equals(elementData[index])) {
+                    //如果相等就调用方法进行删除
+                    fastRemove(index);
+                    return true;
+                }
+        }
+        return false;
+    }
+
+    //真正删除元素的方法
+    private void fastRemove(int index) {
+        //在删除的方法中集合实际修改次数会自增
+        //集合实际修改次数为:4 但是预期修改次数为:3
+        modCount++;
+        //计算集合要移动元素的个数
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            //移动的核心代码
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        //就是让删除的元素置为null,就是为了尽快被垃圾回收机制回收
+        elementData[--size] = null; // clear to let GC do its work
+    }
+
+ }
+/*
+ 结论:
+    一,集合每次调用add方法的时候,实际修改次数变量的值都会自增一次
+    二,在获取迭代器的时候,集合只会执行一次将实际修改集合的次数赋值给预期修改集合的次数
+    三,集合在删除元素的时候也会针对实际修改次数的变量进行自增的操作*/
+```
+
+并发修改的特殊情况
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    //查看add方法其目的就是为了找到记录集合实际修改次数的变量
+    public boolean add(E e) {
+        ensureCapacityInternal(size + 1);
+        elementData[size++] = e;
+        return true;
+    }
+
+    //获取迭代器的方法
+    public Iterator<E> iterator() {
+        //创建了一个对象
+        return new Itr();
+    }
+
+    //ArrayList集合的内部类 --> 迭代器的源码
+    private class Itr implements Iterator<E> {
+        int cursor;       // 光标,默认值就是0
+        int lastRet = -1; // 记录-1
+        // 将集合实际修改次数赋值给预期修改次数
+        // 获取迭代器的时候,那么expectedModCount的值也就是 3
+        int expectedModCount = modCount;
+
+        //判断集合是否有元素
+        public boolean hasNext() {
+            //光标是否不等于集合的size 3
+            return cursor != size;
+        }
+
+        public E next() {
+            checkForComodification();
+            //光标赋值给i = 0
+            int i = cursor;
+            //判断,如果大于集合的size就说明没有元素了
+            if (i >= size)
+                throw new NoSuchElementException();
+            //把集合存储数据数组的地址赋值给该方法的局部变量
+            Object[] elementData = ArrayList.this.elementData;
+            //进行判断,如果条件满足就会产生并发修改异常
+            if (i >= elementData.length)
+                throw new ConcurrentModificationException();
+            //光标自增
+            cursor = i + 1;
+            //从数组中取出元素且返回
+            return (E) elementData[lastRet = i];
+        }
+
+        //校验预期修改集合次数是否和实际修改集合次数一样
+        final void checkForComodification() {
+            if (modCount != expectedModCount)
+                //如果不一样,就会产生并发修改异常
+                throw new ConcurrentModificationException();
+        }
+    }
+
+    //集合删除元素的方法
+    public boolean remove(Object o) {
+        //判断要删除的元素是否为null
+        if (o == null) {
+            for (int index = 0; index < size; index++)
+                if (elementData[index] == null) {
+                    fastRemove(index);
+                    return true;
+                }
+        } else {
+            //遍历集合
+            for (int index = 0; index < size; index++)
+                //拿着要删除的元素和集合的每一个元素进行比较
+                if (o.equals(elementData[index])) {
+                    //如果相等就调用方法进行删除
+                    fastRemove(index);
+                    return true;
+                }
+        }
+        return false;
+    }
+
+    //真正删除元素的方法
+    private void fastRemove(int index) {
+        //在删除的方法中集合实际修改次数会自增
+        //集合实际修改次数为:4 但是预期修改次数为:3
+        modCount++;
+        //计算集合要移动元素的个数
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            //移动的核心代码
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        //就是让删除的元素置为null,就是为了尽快被垃圾回收机制回收
+        elementData[--size] = null; // clear to let GC do its work
+    }
+
+ }
+
+ 结论:
+    当要删除的元素在集合的倒数第二个位置的时候,不会产生并发修改异常
+ 原因:
+    是因为在调用hasNext方法的时候,光标的值和集合的长度一样,那么就会返回false
+    因此就不会再去调用next方法获取集合的元素,既然不会调用next方法那么底层就不会产生并发修改异常
+```
+
+并发修改异常解决方法 使用迭代器的删除方法
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    //查看add方法其目的就是为了找到记录集合实际修改次数的变量
+    public boolean add(E e) {
+        ensureCapacityInternal(size + 1);
+        elementData[size++] = e;
+        return true;
+    }
+
+    //获取迭代器的方法
+    public Iterator<E> iterator() {
+        //创建了一个对象
+        return new Itr();
+    }
+
+    //ArrayList集合的内部类 --> 迭代器的源码
+    private class Itr implements Iterator<E> {
+        int cursor;       // 光标,默认值就是0
+        int lastRet = -1; // 记录-1
+        // 将集合实际修改次数赋值给预期修改次数
+        // 获取迭代器的时候,那么expectedModCount的值也就是 3
+        int expectedModCount = modCount;
+
+        //判断集合是否有元素
+        public boolean hasNext() {
+            //光标是否不等于集合的size 3
+            return cursor != size;
+        }
+
+         //迭代器自带的方法
+         public void remove() {
+            if (lastRet < 0)
+                throw new IllegalStateException();
+            checkForComodification();
+
+            try {
+                ArrayList.this.remove(lastRet);
+                cursor = lastRet;
+                lastRet = -1;
+                //把实际修改集合次数赋值给预期修改次数
+                expectedModCount = modCount;
+            } catch (IndexOutOfBoundsException ex) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        public E next() {
+            checkForComodification();
+            //光标赋值给i = 0
+            int i = cursor;
+            //判断,如果大于集合的size就说明没有元素了
+            if (i >= size)
+                throw new NoSuchElementException();
+            //把集合存储数据数组的地址赋值给该方法的局部变量
+            Object[] elementData = ArrayList.this.elementData;
+            //进行判断,如果条件满足就会产生并发修改异常
+            if (i >= elementData.length)
+                throw new ConcurrentModificationException();
+            //光标自增
+            cursor = i + 1;
+            //从数组中取出元素且返回
+            return (E) elementData[lastRet = i];
+        }
+
+        //校验预期修改集合次数是否和实际修改集合次数一样
+        final void checkForComodification() {
+            if (modCount != expectedModCount)
+                //如果不一样,就会产生并发修改异常
+                throw new ConcurrentModificationException();
+        }
+    }
+
+    //集合删除元素的方法
+    public boolean remove(Object o) {
+        //判断要删除的元素是否为null
+        if (o == null) {
+            for (int index = 0; index < size; index++)
+                if (elementData[index] == null) {
+                    fastRemove(index);
+                    return true;
+                }
+        } else {
+            //遍历集合
+            for (int index = 0; index < size; index++)
+                //拿着要删除的元素和集合的每一个元素进行比较
+                if (o.equals(elementData[index])) {
+                    //如果相等就调用方法进行删除
+                    fastRemove(index);
+                    return true;
+                }
+        }
+        return false;
+    }
+
+    //真正删除元素的方法
+    private void fastRemove(int index) {
+        //在删除的方法中集合实际修改次数会自增
+        //集合实际修改次数为:4 但是预期修改次数为:3
+        modCount++;
+        //计算集合要移动元素的个数
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            //移动的核心代码
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        //就是让删除的元素置为null,就是为了尽快被垃圾回收机制回收
+        elementData[--size] = null; // clear to let GC do its work
+    }
+
+    //集合删除的方法
+    public E remove(int index) {
+        rangeCheck(index);
+
+        modCount++;
+        E oldValue = elementData(index);
+
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        elementData[--size] = null; // clear to let GC do its work
+
+        return oldValue;
+    }
+
+ }
+
+ 结论:
+    一,迭代器调用remove方法删除元素,其实底层真正还是调用集合自己的删除方法来删除元素
+    二,在调用remove方法中会每次都给预期修改次数的变量赋值
+```
+
+
+
+## 3.8 清空方法clear()
+
+```java
+public class ArrayList<E> {
+	//长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    //清空集合元素的方法
+    public void clear() {
+        //实际修改次数自增
+        modCount++;
+        //遍历集合
+        for (int i = 0; i < size; i++)
+            //把数组的每一个位置都置为null,让垃圾回收期尽早地回收
+            elementData[i] = null;
+        //把集合的长度置为0
+        size = 0;
+    }
+}
+```
+
+
+
+## 3.9 包含方法contains(Object o)
+
+```java
+public class ArrayList<E> {
+    //源码contains方法
+    public boolean contains(Object o) {
+        //调用indexOf方法进行查找
+        return indexOf(o) >= 0;
+    }
+    public int indexOf(Object o) {
+        //如果元素是null,也进行遍历操作
+        //因为集合中有可能够会存储null
+        if (o == null) {
+            for (int i = 0; i < size; i++)
+                if (elementData[i]==null)
+                	return i;
+        } else {
+            for (int i = 0; i < size; i++)
+            	if (o.equals(elementData[i]))
+            		return i;
+        }
+        //如果没有走if,也没有走else,那么就说明o该元素在集合中不存在
+        return -1;
+    }
+}
+```
+
+
+
+## 3.10 是否为空isEmpty()
+
+```java
+public class ArrayList<E> {
+    //长度为0的空数组
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    //默认容量为空的数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    //集合存元素的数组
+    Object[] elementData;
+
+    //集合的长度
+    private int size;
+
+    //默认的容量
+    private static final int DEFAULT_CAPACITY = 10;
+
+    public boolean isEmpty() {
+        //根据集合的长度返回对应的结果
+        return size == 0;
+    }
+ }
+```
+
+
+
+# 4. 面试题
+
+## 4.1 ArrayList是如何扩容的？
+
+源码分析过程中已经讲解
+
+第一次扩容10
+
+以后每次都是原容量的1.5倍
+
+## 4.2 ArrayList频繁扩容导致添加性能急剧下降，如何处理？
+
+使用带参数的构造器
+
+这种优化方式只针对特定的场景，如果添加的元素是少量的、未知的，不推荐使用
+
+## 4.3 ArrayList插入或删除元素一定比LinkedList慢么?
+
+```java
+public class Test02 {
+    public static void main(String[] args) {
+        //创建ArrayList集合对象
+        ArrayList<String> arrayList = new ArrayList<String>();
+        //添加500W个元素
+        for (int i = 0; i < 5000000; i++) {
+            arrayList.add(i+"_");
+        }
+        //获取开始时间
+        long startTime = System.currentTimeMillis();
+        //根据索引删除ArrayList集合元素
+        //删除索引5000对应的元素
+        String value = arrayList.remove(50000);
+        System.out.println(value);
+        //获取结束时间
+        long endTime = System.currentTimeMillis();
+        System.out.println("ArrayList集合删除元素的时间: "+(endTime-startTime));
+
+        //创建LinkedList集合对象
+        LinkedList<String> linkedList = new LinkedList<String>();
+        //添加500W个元素
+        for (int i = 0; i < 5000000; i++) {
+            linkedList.add(i+"_");
+        }
+        //获取开始时间
+        startTime = System.currentTimeMillis();
+        //根据索引删除LinkedList集合元素
+        //删除索引5000对应的元素
+        value = arrayList.remove(50000);
+        System.out.println(value);
+        endTime = System.currentTimeMillis();
+        System.out.println("LinkedList集合删除元素的时间: "+(endTime-startTime));
+    }
+}
+```
+
+ArrayList根据索引删除方法源码解析：
+
+```java
+public class ArrayList<E> {
+	public E remove(int index) {
+        //范围校验
+        rangeCheck(index);
+	   //增量++
+        modCount++;
+        //将index对应的元素赋值给 oldValue
+        E oldValue = elementData(index);
+	    //计算集合需要移动元素个数
+        int numMoved = size - index - 1;
+        //如果需要移动元素个数大于0,就使用arrayCopy方法进行拷贝
+        //注意:数据源和数据目的就是elementData
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        //将源集合最后一个元素置为null,尽早让垃圾回收机制对其进行回收
+        elementData[--size] = null;
+	   //返回被删除的元素
+        return oldValue;
+    }
+}
+```
+
+LinkedList根据索引删除方法源码解析：
+
+```java
+public class LinkedList<E> {
+
+    //LinkedList集合删除的方法
+    public E remove(int index) {
+        //
+        checkElementIndex(index);
+        return unlink(node(index));
+    }
+
+    private void checkElementIndex(int index) {
+        if (!isElementIndex(index))
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+
+    //校验
+    private boolean isElementIndex(int index) {
+        return index >= 0 && index < size;
+    }
+
+    //找元素的方法
+    Node<E> node(int index) {  
+        //不管索引是多少,在源码底层都会对整个链表上的元素进行折半的动作
+        //如果要删除元素的索引小于集合长度的一半,那么就从头节点一个个的往后找
+        //如果要删除元素的索引大于集合长度的一半,那么就从尾节点一个个的往后找
+        //(注:这个查找的效率相对于ArrayList集合来说较低)
+        //判断index 是否小于 集合长度的一半
+        if (index < (size >> 1)) {
+            //如果小于,那么就第一个节点赋值给x
+            Node<E> x = first;
+            //从头开始往后找
+            //如果循环条件不满足,那么first就是要删除的元素
+            //否则,要删除的元素就是first的下一个
+            for (int i = 0; i < index; i++)  
+                //获取下一个节点
+                x = x.next;
+            //返回找到的节点
+            return x;
+        } else {
+            //把最后一个节点赋值给x
+            Node<E> x = last;
+            //从最后一个位置往前找
+            //如果循环条件不满足,那么last就是要删除的元素
+			//否则,要删除的元素就是last的前一个
+            for (int i = size - 1; i > index; i--)
+                //获取前一个节点
+                x = x.prev;
+            //返回找到的节点
+            return x;
+        }
+    }
+
+    E unlink(Node<E> x) {
+        //获取节点中的元素
+        final E element = x.item;
+        //获取下一个节点
+        final Node<E> next = x.next;
+        //获取上一个节点
+        final Node<E> prev = x.prev;
+
+        if (prev == null) {
+            first = next;
+        } else {
+            prev.next = next;
+            x.prev = null;
+        }
+
+        if (next == null) {
+            last = prev;
+        } else {
+            next.prev = prev;
+            x.next = null;
+        }
+        //把元素置为null
+        x.item = null;
+        //长度--
+        size--;
+        //实际修改集合的次数自增
+        modCount++;
+        //返回被替换的元素
+        return element;
+    }
+}
+```
+
+**结论**
+
+1. 数组删除元素确实要比链表慢，慢在需要创建新数组，还有比较麻烦的数据拷贝，但是在ArrayList
+底层不是每次删除元素都需要扩容，因此在这个方面相对于链表来说数组的性能更好
+2. LinkedList删除元素之所以效率并不高，其原理在于底层先需要对整个集合进行折半的动作，然后
+又需要对集合进行遍历一次，这些操作导致效率变低
