@@ -1648,3 +1648,25 @@ public class LinkedList<E> {
 底层不是每次删除元素都需要扩容，因此在这个方面相对于链表来说数组的性能更好
 2. LinkedList删除元素之所以效率并不高，其原理在于底层先需要对整个集合进行折半的动作，然后
 又需要对集合进行遍历一次，这些操作导致效率变低
+
+## 4.5 如何复制某个ArrayList到另一个ArrayList中去？
+
+1. 使用clone()方法
+
+2. 使用ArrayList构造方法
+
+3. 使用addAll方法
+
+## 4.6 已知成员变量集合存储N多用户名称,在多线程的环境下,使用迭代器在读取集合数据的同时如何保证还可以正常的写入数据到集合?
+
+## 4.7 ArrayList、LinkedList区别
+
+* ArrayList
+  * 基于数组的数据结构 
+  * 对于随机访问的get和set，ArrayList要优于LinkedList
+  * 对于随机操作的add和remove，ArrayList不一定比LinkedList慢（ArrayList底层由于是动态数组，因此并不是每次add和remove的时候都需要创建新数组）
+* LinkedList
+  * 基于链表的数据结构
+  * 对于顺序操作，LinkedList不一定比ArrayList慢
+  * 对于随机操作，LinkedList效率明显较低
+
