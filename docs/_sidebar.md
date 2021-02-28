@@ -12,3 +12,7 @@
     * [获得多线程的第三种方式:Callable接口](juc/090-Callable.md)
     * [线程池](juc/100-ThreadPool.md)
     * [死锁](juc/110-Deadlock.md)
+* Spring
+  * [IoC](spring/010-IoC.md)
+  * [AOP](spring/020-AOP.md)
+  * [循环依赖](spring/030-CircularDependencies.md)
