@@ -1,5 +1,6 @@
 * 集合
   * [ArrayList](collection/010-ArrayList.md)
+  * [HashMap](collection/020-HashMap.md)
 * JUC多线程学习篇
     * [对volatile的理解](juc/010-volatile关键字.md)
     * [CAS](juc/020-CAS.md)
