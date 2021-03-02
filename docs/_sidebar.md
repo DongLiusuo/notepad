@@ -19,4 +19,5 @@
 * Redis
   * [基本数据类型](redis/020-basicDataType.md)
   * [通用命令](redis/030-basicCmd.md)
-  * [配置文建](redis/040-configFile.md)
+  * [配置文件](redis/040-configFile.md)
+  * [持久化](redis/050-persistent.md)
