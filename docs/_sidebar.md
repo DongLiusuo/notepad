@@ -19,3 +19,4 @@
 * Redis
   * [基本数据类型](redis/020-basicDataType.md)
   * [通用命令](redis/030-basicCmd.md)
+  * [配置文建](redis/040-configFile.md)
