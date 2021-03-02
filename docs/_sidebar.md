@@ -18,3 +18,4 @@
   * [循环依赖](spring/030-CircularDependencies.md)
 * Redis
   * [基本数据类型](redis/020-basicDataType.md)
+  * [通用命令](redis/030-basicCmd.md)
