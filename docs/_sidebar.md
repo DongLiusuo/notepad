@@ -16,3 +16,5 @@
   * [IoC](spring/010-IoC.md)
   * [AOP](spring/020-AOP.md)
   * [循环依赖](spring/030-CircularDependencies.md)
+* Redis
+  * [基本数据类型](redis/020-basicDataType.md)
