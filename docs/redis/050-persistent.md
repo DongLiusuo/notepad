@@ -195,28 +195,32 @@ save配置启动后执行的是bgsave操作
 ### AOF写数据三种策略
 
 - always(每次)
-- 每次写入操作均同步到AOF文件中，**数据零误差，性能较低**
-- everysec(每秒)
-  每秒将缓冲区中的指令同步到AOF文件中，**数据准确性高，性能较高**
-  再系统突然当即的情况下丢失1秒内的数据
+
+  每次写入操作均同步到AOF文件中，**数据零误差，性能较低**
+
+- everysec(每秒)    建议使用此配置
+  
+  每秒将缓冲区中的指令同步到AOF文件中，**数据准确性相对较高，性能较高**
+  
+  在系统突然当即的情况下丢失1秒内的数据
+  
 - no(系统控制)
+  
   由操作系统每次同步到AOF文件的周期，整体过程**不可控**
 
 ##### AOF功能开启
 
-- 配置
+- 配置 [redis.conf文件]
 
 > appendonly yes|no
 
-- 作用
-  是否开启APF持久化功能，默认为不开启
-- 配置
+​		作用：是否开启APF持久化功能，默认为不开启
+
+- 配置 [redis.conf文件]
 
 > appendfsync always|everysec|no
 
-- 作用
-
-  AOF写数据策略
+​		作用：AOF写数据策略
 
 ##### AOF相关配置
 
@@ -224,14 +228,15 @@ save配置启动后执行的是bgsave操作
 
 > appendfilename filename
 
-- 作用
-  AOF持久化文件名，默认文件名为appendonly.aof,建议配置为appendonly-端口号.aof
+​	作用
+：AOF持久化文件名，默认文件名为appendonly.aof,建议配置为appendonly-端口号.aof
+
 - 配置
 
 > dir
 
-- 作用
-  AOF持久化文件保存路径，与RDB持久化文件保持一致即可
+​	作用
+：AOF持久化文件保存路径，与RDB持久化文件保持一致即可
 
 ##### AOF写数据遇到的问题
 
@@ -260,11 +265,11 @@ save配置启动后执行的是bgsave操作
 
 ##### AOF重写方式
 
-- 手动重写
+- 手动重写 在客户端内输入该指令
 
 > bgrewriteaof
 
-- 自动重写
+- 自动重写  配置文件
 
 > auto-aof-rewrite-min-size size
 >
@@ -278,14 +283,15 @@ save配置启动后执行的是bgsave操作
 
 - 自动重写触发条件设置
 
-> auto-aof-rewrite-min-size
+> auto-aof-rewrite-min-size *size*       自动重写aof的最小尺寸
 >
-> auto-aof-rewrite-percentage percent
+> auto-aof-rewrite-percentage *percent*      自动重写的需要达到的百分比
 
 - 自动重写触发对比参数（运行指令info Persistence获取具体信息）
 
-> aof_current_size
-> aof_base_size
+> aof_current_size   当前尺寸
+>
+> aof_base_size      基础尺寸
 
 - 自动重写触发条件
 
@@ -313,5 +319,5 @@ save配置启动后执行的是bgsave操作
 1. RDB与AOF得选择实际上是在做一种权衡，每种都有利弊
 2. 如不能承受数分钟以内得数据丢失，对业务数据非常敏感，选用AOF
 3. 如能承受数分钟以内数据丢失，且追求大数据集得恢复速度，选用RDB
-   灾难恢复选用RDB
-4. 双保险策略，同时开启RDB和AOF，重启后，Redis优先使用AOF来恢复数据，降低丢失数据的量
+4. 灾难恢复选用RDB
+5. 双保险策略，同时开启RDB和AOF，重启后，Redis优先使用AOF来恢复数据，降低丢失数据的量
