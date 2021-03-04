@@ -21,3 +21,4 @@
   * [通用命令](redis/030-basicCmd.md)
   * [配置文件](redis/040-configFile.md)
   * [持久化](redis/050-persistent.md)
+  * [Redis事务和锁](redis/060-transactionAndLock.md)
