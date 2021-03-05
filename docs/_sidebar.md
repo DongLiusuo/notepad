@@ -23,3 +23,4 @@
   * [持久化](redis/050-persistent.md)
   * [Redis事务和锁](redis/060-transactionAndLock.md)
   * [删除策略](redis/070-delPolicy.md)
+  * [redis.conf常用配置](redis/080-conf.md)
