@@ -24,3 +24,6 @@
   * [Redis事务和锁](redis/060-transactionAndLock.md)
   * [删除策略](redis/070-delPolicy.md)
   * [redis.conf常用配置](redis/080-conf.md)
+  * [数据类型:Bitmaps](redis/090-bitmaps.md)
+  * [数据类型:HyperLogLog](redis/100-HyperLogLog.md)
+  * [数据类型:GEO](redis/110-GEO.md)
