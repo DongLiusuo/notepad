@@ -27,3 +27,4 @@
   * [数据类型:Bitmaps](redis/090-bitmaps.md)
   * [数据类型:HyperLogLog](redis/100-HyperLogLog.md)
   * [数据类型:GEO](redis/110-GEO.md)
+  * [redis集群：主从复制](redis/120-masterSlave.md)
