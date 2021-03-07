@@ -6,3 +6,4 @@
 * 2021年3月5日 Redis删除策略
 * 2021年3月6日 redis的常用配置
 * 2021年3月6日 redis主从复制
+* 2021年3月7日 spring-cloud-eureka
