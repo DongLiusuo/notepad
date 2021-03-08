@@ -192,3 +192,66 @@ public class ApplicationContextConfiguration {
 到此为止，**Eureka Server 集群**、**Service Provider 集群**、**消费者注册到 Eureka Server 集群**（包括 **Service Provider 集群注册到 Eureka Server 集群**）全部配置完成。
 
   RestTemplate 配合 **微服务名** 访问方式、@LoadBalance 默认轮询负载均衡机制的使用，Eureka 微服务集群模式，大功搞成。
+
+## 服务实例名
+
+   当服务实体向 Eureka Server 注册时，注册名默认是 **"IP名:应用名:应用端口名"**，在 Eureka Server 中显示如图。
+
+![1615111043633](010-Eureka/1615111043633.png)
+
+根据需要，**我们也可以自定义实例名**。
+
+当我们将鼠标放在实例上，发现 url 指向的如果还是**主机名+端口号**，或者说是你想跳转到指定的地址。**此时我们也可以来自定义实例名指向的 URL 地址。**
+
+```yaml
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.ip-address}:${server.port} # 主机名称修改(配置后Eureka Server处显示,不配置显示默认注册名)
+    prefer-ip-address: true # 访问路径可以显示IP地址
+    status-page-url-path: /aaa/bbb # 跳转的相对路径
+```
+
+# 关闭 Eureka 自我保护模式
+
+保护模式，主要用于一组客户端 和 Eureka Server 之间存在网络分区场景下的保护。一旦进入保护模式，Eureka Server 将会尝试保护其服务注册表中的信息，不再删除服务注册表中的数据，也就是不会注销任何微服务实例。
+
+  当我们在 Eureka Server 服务首页中，看到有如下这段提示，则说明此时 Eureka Server 已经进入了保护模式。
+
+![1615111658576](010-Eureka/1615111658576.png)
+
+## Eureka Server 为什么会进入保护模式
+
+  默认情况下，如果 Eureka Server 在一定时间内没有收到某个微服务实例的心跳，Eureka Server 便会将该实例注销。 **（默认是90s）**
+
+  但是 **当网络分区发生故障(延迟、卡顿、拥挤)时**，微服务与 Eureka Server 之间是无法正常通信的，**在这种情况下微服务本身其实是健康的，本来是不应该注销这个服务的**，此时 Eureka 便会通过 “自我保护模式” 来解决这个问题。
+
+  Eureka 的自我保护机制，就是 CAP 原则中的 **AP 分支**。即满足：**可用性**、**分区容错性**。
+
+> CAP 原则又称 CAP 定理，指的是在一个分布式系统中，一致性（Consistency）、可用性（Availability）、分区容错性（Partition tolerance）。CAP 原则指的是，这三个要素最多只能同时实现两点，不可能三者兼顾。
+
+## 如何禁用自我保护
+
+  在 Eureka 中，自我保护模式默认是 **开启** 的。**此处也只是来演示一下如何关闭。****生产环境中是不建议关闭 Eureka 的自我保护模式**。
+
+eureka server端添加如下配置
+
+```yml
+eureka:
+  server:
+    enable-self-preservation: false #关闭自我保护机制 默认为true
+    eviction-interval-timer-in-ms: 2000 #清理无效节点的间隔
+```
+
+eureka client端添加如下配置
+
+```yml
+eureka:
+  instance:
+    # Eureka客户端向服务端发送心跳的时间间隔,单位为妙(默认是30s)
+    lease-renewal-interval-in-seconds: 1
+    # Eureka服务端在收到最后一次心跳后的等待时间上限,单位为秒(默认90s),超时将移除服务
+    lease-expiration-duration-in-seconds: 2
+```
+
+这种情况下，我们手动将该微服务停止，Eureka Server 便会在 4s 超时过后，将其移除服务。不会给它任何的机会，当遇到网络 **延迟、卡顿、拥挤** 时，这种操作显然是不友好的。
+
