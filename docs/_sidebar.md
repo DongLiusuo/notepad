@@ -20,6 +20,7 @@
   * [SpringBoot和SpringCloud之间的版本对应关系](spring-cloud/007-ver.md)
   * [基于RestTemplate的服务间通讯](spring-cloud/008-RestTemplate.md)
   * [服务的注册中心-Eureka](spring-cloud/010-Eureka.md)
+  * [负载均衡-Ribbon](spring-cloud/020-Ribbon.md)
 * Redis
   * [基本数据类型](redis/020-basicDataType.md)
   * [通用命令](redis/030-basicCmd.md)
