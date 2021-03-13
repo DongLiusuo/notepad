@@ -11,3 +11,4 @@
 * 2021年3月7日 服务的注册中心：spring-cloud-Eureka
 * 2021年3月8日 远程调用与负载均衡：spring-cloud-Ribbon
 * 2021年3月8日 远程调用与负载均衡：spring-cloud-OpenFeign
+* 2021年3月9日 远程调用与负载均衡：spring-cloud-Hystrix
