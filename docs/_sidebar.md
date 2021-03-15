@@ -27,6 +27,7 @@
     * [服务降级-Hystrix隔离策略：线程池、信号量](spring-cloud/048-Hystrix48.md)
     * [服务网关-Gateway](spring-cloud/050-Gateway.md)
     * [服务配置中心-Config](spring-cloud/060-Config.md)
+    * [服务总线-Bus](spring-cloud/070-Bus.md)
 * Redis
     * [基本数据类型](redis/020-basicDataType.md)
     * [通用命令](redis/030-basicCmd.md)
