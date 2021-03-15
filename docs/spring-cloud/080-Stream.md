@@ -179,7 +179,7 @@ public class MessageProviderImpl implements IMessageProvider {
 ###### Ⅳ. 客户端测试
 
   启动RabbitMQ、微服务相关模块，通过接口调用 `http://localhost:8801/sendMessage` 进行消息发送，可以看到后台有显示发送消息，进入 RabbitMQ 可视化界面，可以看到有发送消息波峰出现。
-![在这里插入图片描述](080-Stream/20200718181518657.gif)
+
 
 #### 6.2 消费者配置
 
