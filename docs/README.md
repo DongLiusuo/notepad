@@ -12,3 +12,4 @@
 * 2021年3月8日 远程调用与负载均衡：spring-cloud-Ribbon
 * 2021年3月8日 远程调用与负载均衡：spring-cloud-OpenFeign
 * 2021年3月9日 远程调用与负载均衡：spring-cloud-Hystrix
+* 2021年5月23日 MySQL索引
