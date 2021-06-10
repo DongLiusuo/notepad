@@ -12,6 +12,16 @@
     * [获得多线程的第三种方式:Callable接口](juc/090-Callable.md)
     * [线程池](juc/100-ThreadPool.md)
     * [死锁](juc/110-Deadlock.md)
+* JVM
+  * [JVM体系结构](jvm/010-JVM.md)
+  * [类装载器](jvm/020-ClassLoader.md)
+  * [本地方法栈](jvm/030-NativeMethodStack.md)
+  * [程序计数器](jvm/040-ProgramCounterRegister.md)
+  * [方法区](jvm/050-MethodArea.md)
+  * [栈](jvm/060-Stack.md)
+  * [栈、堆、方法区的交互关系](jvm/070-StackHeapMethodAreaRelation.md)
+  * [堆](jvm/080-Heap.md)
+  * [GC](jvm/090-JavaGarbageCollection.md)
 * Spring
     * [IoC](spring/010-IoC.md)
     * [AOP](spring/020-AOP.md)

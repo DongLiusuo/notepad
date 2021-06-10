@@ -36,7 +36,6 @@ MySQL官方对索引的定义为：索引（index）是帮助MySQL高效获取�
 - Full-text （全文索引） ：全文索引也是MyISAM的一个特殊索引类型，主要用于全文索引，InnoDB从Mysql5.6版本开始支持全文索引。
 
 <center><b>MyISAM、InnoDB、Memory三种存储引擎对各种索引类型的支持</b></center>
-
 | 索引        | InnoDB引擎      | MyISAM引擎 | Memory引擎 |
 | ----------- | --------------- | ---------- | ---------- |
 | BTREE索引   | 支持            | 支持       | 支持       |
