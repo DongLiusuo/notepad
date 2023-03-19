@@ -500,6 +500,7 @@ Map<String, Object> getUserToMap(@Param("id") int id);
  */  
 List<Map<String, Object>> getAllUserToMap();
 ```
+
 ```xml
 <!--Map<String, Object> getAllUserToMap();-->  
 <select id="getAllUserToMap" resultType="map">  
