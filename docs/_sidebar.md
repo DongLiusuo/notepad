@@ -1,4 +1,7 @@
+* 设计模式
+    * 
 * 集合
+    * [Sort](collection/005-Sort.md)
     * [ArrayList](collection/010-ArrayList.md)
     * [HashMap](collection/020-HashMap.md)
 * JUC多线程学习篇
@@ -55,3 +58,6 @@
     * [数据类型:HyperLogLog](redis/100-HyperLogLog.md)
     * [数据类型:GEO](redis/110-GEO.md)
     * [redis集群：主从复制](redis/120-masterSlave.md)
+* Docker
+    * [Docker基础命令](docker/010-basicCmd.md)
+* [MyBatis](myBatis/MyBatis笔记.md)
