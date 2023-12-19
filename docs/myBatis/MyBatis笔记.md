@@ -671,11 +671,13 @@ public void insertUser() {
 		</select>
 		```
 	2. 可以在MyBatis的核心配置文件中的`setting`标签中，设置一个全局配置信息mapUnderscoreToCamelCase，可以在查询表中数据时，自动将_类型的字段名转换为驼峰，例如：字段名user_name，设置了mapUnderscoreToCamelCase，此时字段名就会转换为userName。[核心配置文件详解](#核心配置文件详解)
-		```xml
+		
+  ```xml
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
-		```
+	```
+
 ## 多对一映射处理
 >查询员工信息以及员工所对应的部门信息
 ```java
