@@ -8,30 +8,28 @@
 
 - Docker_Host：
 
-- - 安装Docker的主机
+  - 安装Docker的主机
 
 - Docker Daemon：
 
-- - 运行在Docker主机上的Docker后台进程
+  - 运行在Docker主机上的Docker后台进程
 
 - Client：
 
-- - 操作Docker主机的客户端（命令行、UI等）
+  - 操作Docker主机的客户端（命令行、UI等）
 
 - Registry：
 
-- - 镜像仓库
+  - 镜像仓库
   - Docker Hub
 
 - Images：
 
-- - 镜像，带环境打包好的程序，可以直接启动运行
+  - 镜像，带环境打包好的程序，可以直接启动运行
 
 - Containers：
 
-- - 容器，由镜像启动起来正在运行中的程序
-
-- 
+  - 容器，由镜像启动起来正在运行中的程序
 
 ## Docker安装[以CentOS7为例]
 

@@ -1,100 +1,109 @@
-# 请谈谈你对volatile的理解
+# JUC并发相关
+## 对volatile的理解
 
- ## 1. volatile是Java虚拟机提供的轻量级的同步机制
+- 保证可见性
 
-   - 保证可见性
+- 不保证原子性
 
-   - 不保证原子性
+- 禁止指令重排
 
-   - 禁止指令重排
 
-     volatile是Java虚拟机提供的轻量级的同步机制，他保证可见性，不保证原子性，禁止指令重排。
+`volatile` 是 Java 中用来修饰变量的关键字之一。它的主要作用是保证多线程环境下变量的可见性，即当一个线程修改了该变量的值，其他线程能够立即看到最新的值。
+
+在 Java 中，每个线程都有自己的工作内存，工作内存中保存着主内存中的变量副本。当多个线程同时操作一个共享变量时，有可能会导致数据不一致的问题，因为一个线程对变量的修改并不一定会立即反映到其他线程的工作内存中。
+
+使用 `volatile` 关键字修饰变量时，会告诉编译器不要将该变量缓存到线程的工作内存中，而是直接从主内存中读取和写入。这样可以确保一个线程对变量的修改能够立即被其他线程看到，从而保证了可见性。
+
+除了可见性，`volatile` 还具有禁止指令重排序的功能。指令重排序是为了提高程序性能，但在多线程环境下可能导致意外的结果。通过使用 `volatile`，可以防止编译器和处理器对指令的重新排序，从而避免潜在的并发问题。
+
+需要注意的是，`volatile` 不能解决所有的线程安全问题。它适用于那些对变量的操作是原子操作的场景，但如果涉及到复合操作，例如 check-then-act 操作，就需要额外的同步手段来保证线程安全性。
+
+总的来说，`volatile` 是一种简单而有效的实现线程可见性的方式，但在特定场景下可能需要结合其他同步手段来确保线程安全。
      
-     ```java
-     import java.util.concurrent.atomic.AtomicInteger;
-     
-     class MyData {
-     
-         volatile int number = 0;
-     
-         public void addTo60() {
-             number = 60;
-         }
-     
-         // number是有volatile修饰的
-         public void addPlusPlus() {
-             number++;
-         }
-     
-         AtomicInteger atomicInteger = new AtomicInteger();
-         public void addAtomic() {
-             atomicInteger.getAndIncrement();
-         }
-     }
-    
-     /**
-      * 1 验证volatile的可见性
-      *   假设int number = 0,number变量没有添加volatile关键字修饰,即没有可见性
-      *   添加了volatile，可以解决可见性的问题。
-      * 2 验证volatile不保证原子性
-      *   原子性是什么意思？
-      *      不可分割，完整性，也即某个线程正在做某个具体业务时，中间不可以被加塞或者被分割。需要整体完整，要么同时成功，要么同时失败。
-      *   volatile不保证原子性的案例展示
-      *   如何解决原子性？
-      *      * 加synchronized
-      *      * 使用原子类
-      */
-     public class VolatileDemo {
-         public static void main(String[] args) { // main线程
-     
-         }
-     
-         //volatile不保证原子性的案例展示
-         private static void notAtmocValtile() {
-             MyData myData = new MyData();
-             //开20个线程 每个线程加1k次
-             for (int i = 0; i < 20; i++) {
-                 new Thread(()->{
-                     for (int j = 0; j < 1000; j++) {
-                         myData.addPlusPlus();
-                         myData.addAtomic();
-                     }
-                 },i+1+"").start();
-             }
-             //main取得number的值
-             // 需要等待以上线程都计算完成后，再用main线程取值
-             while (Thread.activeCount() > 2) { //2:mian和gc线程
-                 Thread.yield();//礼让
-             }
-             System.out.println(Thread.currentThread().getName()+"\tfinally number  is "+myData.number+"\t atmocNum is "+myData.atomicInteger.get());
-             /*运行结果
-              main	finally number  is 19880	 atmocNum is 20000
-             */
-         }
-     
-         // volatile可以保证可见性，及时通知其他线程，主内存的值被修改了
-         private static void seeOkVolatile() {
-             MyData myData = new MyData(); //资源类
-     
-             // 第一个线程修改值
-             new Thread(()->{
-                 System.out.println(Thread.currentThread().getName()+"线程执行");
-                 // 暂停一会线程
-                 try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
-                 myData.addTo60();
-                 System.out.println(Thread.currentThread().getName() + "线程执行修改了值：" + myData.number);
-             },"A").start();
-     
-             //第二个线程是main线程
-             while (myData.number == 0) {
-                 // main一直在这里等待 直到number的值不再是0  不加volatile修饰 A线程的修改的值对于main来说不可见
-             }
-             System.out.println(Thread.currentThread().getName()+"\t mission over, main get number value is "+myData.number);
-         }
-     
-     }
-     
-     ```
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+ 
+class MyData {
+ 
+    volatile int number = 0;
+ 
+    public void addTo60() {
+        number = 60;
+    }
+ 
+    // number是有volatile修饰的
+    public void addPlusPlus() {
+        number++;
+    }
+ 
+    AtomicInteger atomicInteger = new AtomicInteger();
+    public void addAtomic() {
+        atomicInteger.getAndIncrement();
+    }
+}
+
+/**
+ * 1 验证volatile的可见性
+ *   假设int number = 0,number变量没有添加volatile关键字修饰,即没有可见性
+ *   添加了volatile，可以解决可见性的问题。
+ * 2 验证volatile不保证原子性
+ *   原子性是什么意思？
+ *      不可分割，完整性，也即某个线程正在做某个具体业务时，中间不可以被加塞或者被分割。需要整体完整，要么同时成功，要么同时失败。
+ *   volatile不保证原子性的案例展示
+ *   如何解决原子性？
+ *      * 加synchronized
+ *      * 使用原子类
+ */
+public class VolatileDemo {
+    public static void main(String[] args) { // main线程
+ 
+    }
+ 
+    //volatile不保证原子性的案例展示
+    private static void notAtmocValtile() {
+        MyData myData = new MyData();
+        //开20个线程 每个线程加1k次
+        for (int i = 0; i < 20; i++) {
+            new Thread(()->{
+                for (int j = 0; j < 1000; j++) {
+                    myData.addPlusPlus();
+                    myData.addAtomic();
+                }
+            },i+1+"").start();
+        }
+        //main取得number的值
+        // 需要等待以上线程都计算完成后，再用main线程取值
+        while (Thread.activeCount() > 2) { //2:mian和gc线程
+            Thread.yield();//礼让
+        }
+        System.out.println(Thread.currentThread().getName()+"\tfinally number  is "+myData.number+"\t atmocNum is "+myData.atomicInteger.get());
+        /*运行结果
+         main	finally number  is 19880	 atmocNum is 20000
+        */
+    }
+ 
+    // volatile可以保证可见性，及时通知其他线程，主内存的值被修改了
+    private static void seeOkVolatile() {
+        MyData myData = new MyData(); //资源类
+ 
+        // 第一个线程修改值
+        new Thread(()->{
+            System.out.println(Thread.currentThread().getName()+"线程执行");
+            // 暂停一会线程
+            try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
+            myData.addTo60();
+            System.out.println(Thread.currentThread().getName() + "线程执行修改了值：" + myData.number);
+        },"A").start();
+ 
+        //第二个线程是main线程
+        while (myData.number == 0) {
+            // main一直在这里等待 直到number的值不再是0  不加volatile修饰 A线程的修改的值对于main来说不可见
+        }
+        System.out.println(Thread.currentThread().getName()+"\t mission over, main get number value is "+myData.number);
+    }
+ 
+}
+```
      
      
 
